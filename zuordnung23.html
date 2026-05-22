@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Vokabeln zuordnen</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 24px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hover-Effekt für Desktops */
+        @media (hover: hover) {
+            .item:not(.matched):not(.selected):hover {
+                border-color: var(--primary-color);
+                background-color: #eff6ff;
+            }
+        }
+
+        .item.selected {
+            border-color: var(--primary-color);
+            background-color: #3b82f6;
+            color: white;
+            font-weight: bold;
+        }
+
+        .item.matched {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+            color: #065f46;
+            cursor: default;
+            animation: fadeOutSlow 1.2s forwards;
+            pointer-events: none; /* Verhindert erneutes Klicken während des Verschwindens */
+        }
+
+        .item.wrong {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+            color: #991b1b;
+            animation: shake 0.4s ease;
+        }
+
+        .feedback-area {
+            text-align: center;
+            min-height: 50px;
+        }
+
+        .btn-reset {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            margin: 10px auto 0;
+            transition: background-color 0.2s;
+        }
+
+        .btn-reset:hover {
+            background-color: #2563eb;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: none;
+            animation: popIn 0.3s ease;
+        }
+
+        /* Animationen */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Langsames Ausblenden und Kollabieren der Elemente */
+        @keyframes fadeOutSlow {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            40% {
+                opacity: 1;
+                background-color: #ecfdf5;
+            }
+            80% {
+                opacity: 0;
+                transform: scale(0.95);
+                padding: 14px;
+                min-height: 50px;
+                margin-bottom: 0;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.9);
+                padding: 0;
+                min-height: 0;
+                height: 0;
+                border: 0 solid transparent;
+                visibility: hidden;
+            }
+        }
+
+        /* Responsive Anpassungen für Smartphones */
+        @media (max-width: 480px) {
+            .game-board {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .column-ru {
+                order: 1;
+            }
+            
+            .column-de {
+                order: 2;
+            }
+
+            .instructions {
+                font-size: 0.85rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Vokabeln zuordnen</h2>
+    <div class="instructions">
+        Klicke zuerst auf ein russisches Wort und danach auf die richtige deutsche Übersetzung.
+    </div>
+
+    <div class="game-board">
+        <!-- Russische Wörter -->
+        <div class="column column-ru" id="ru-column"></div>
+        
+        <!-- Deutsche Wörter -->
+        <div class="column column-de" id="de-column"></div>
+    </div>
+
+    <div class="feedback-area">
+        <div class="success-message" id="success-msg">Gut gemacht! Alles richtig zugeordnet. 🎉</div>
+        <button class="btn-reset" id="reset-btn" onclick="initGame()">Nochmal spielen</button>
+    </div>
+</div>
+
+<script>
+    const dataset = [
+        { id: 1, ru: "терпение", de: "die Geduld" },
+        { id: 2, ru: "лопнуло", de: "ist geplatzt / gerissen" },
+        { id: 3, ru: "выражение", de: "der Ausdruck / die Redewendung" },
+        { id: 4, ru: "друг", de: "der Freund" },
+        { id: 5, ru: "обманул", de: "hat angelogen / betrogen" },
+        { id: 6, ru: "мы больше не друзья", de: "wir sind keine Freunde mehr" }
+    ];
+
+    let selectedRu = null;
+    let selectedDe = null;
+    let pairsMatched = 0;
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function initGame() {
+        const ruColumn = document.getElementById('ru-column');
+        const deColumn = document.getElementById('de-column');
+        const successMsg = document.getElementById('success-msg');
+        const resetBtn = document.getElementById('reset-btn');
+
+        ruColumn.innerHTML = '';
+        deColumn.innerHTML = '';
+        successMsg.style.display = 'none';
+        resetBtn.style.display = 'none';
+        selectedRu = null;
+        selectedDe = null;
+        pairsMatched = 0;
+
+        const ruList = shuffle([...dataset]);
+        const deList = shuffle([...dataset]);
+
+        ruList.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.textContent = item.ru;
+            div.dataset.id = item.id;
+            div.onclick = () => selectItem(div, 'ru');
+            ruColumn.appendChild(div);
+        });
+
+        deList.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.textContent = item.de;
+            div.dataset.id = item.id;
+            div.onclick = () => selectItem(div, 'de');
+            deColumn.appendChild(div);
+        });
+    }
+
+    function selectItem(element, lang) {
+        if (element.classList.contains('matched')) return;
+
+        if (lang === 'ru') {
+            if (selectedRu) selectedRu.classList.remove('selected');
+            selectedRu = element;
+            element.classList.add('selected');
+        } else {
+            if (selectedDe) selectedDe.classList.remove('selected');
+            selectedDe = element;
+            element.classList.add('selected');
+        }
+
+        if (selectedRu && selectedDe) {
+            checkMatch();
+        }
+    }
+
+    function checkMatch() {
+        const idRu = selectedRu.dataset.id;
+        const idDe = selectedDe.dataset.id;
+
+        if (idRu === idDe) {
+            // Richtiges Paar
+            selectedRu.className = 'item matched';
+            selectedDe.className = 'item matched';
+            pairsMatched++;
+            
+            selectedRu = null;
+            selectedDe = null;
+
+            if (pairsMatched === dataset.length) {
+                // Das Erfolgs-Feedback wartet kurz, bis die Animation der letzten Karten fast fertig ist
+                setTimeout(() => {
+                    document.getElementById('success-msg').style.display = 'block';
+                    document.getElementById('reset-btn').style.display = 'block';
+                }, 1000);
+            }
+        } else {
+            // Falsches Paar
+            const tempRu = selectedRu;
+            const tempDe = selectedDe;
+
+            tempRu.classList.add('wrong');
+            tempDe.classList.add('wrong');
+
+            selectedRu.classList.remove('selected');
+            selectedDe.classList.remove('selected');
+            
+            selectedRu = null;
+            selectedDe = null;
+
+            setTimeout(() => {
+                tempRu.classList.remove('wrong');
+                tempDe.classList.remove('wrong');
+            }, 400);
+        }
+    }
+
+    window.onload = initGame;
+</script>
+
+</body>
+</html>
