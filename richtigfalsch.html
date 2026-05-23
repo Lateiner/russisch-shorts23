@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Richtig oder Falsch?</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 28px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 25%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .statement-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            font-size: 1.15rem;
+            line-height: 1.5;
+            text-align: center;
+            margin-bottom: 24px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .btn-choice {
+            flex: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .btn-choice:not(.disabled):hover {
+                border-color: var(--primary-color);
+                background-color: #f0f7ff;
+                transform: translateY(-2px);
+            }
+        }
+
+        .btn-choice.correct {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+            color: #065f46;
+        }
+
+        .btn-choice.wrong {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+            color: #991b1b;
+        }
+
+        .btn-choice.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn-choice.disabled.correct,
+        .btn-choice.disabled.wrong {
+            opacity: 1;
+        }
+
+        .feedback-box {
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            margin-bottom: 24px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .feedback-box.success {
+            display: block;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+            color: #166534;
+        }
+
+        .feedback-box.error {
+            display: block;
+            background-color: #fff5f5;
+            border-left: 4px solid var(--error-color);
+            color: #991b1b;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-nav {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            max-width: 180px;
+            text-align: center;
+        }
+
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+            display: none;
+        }
+
+        .btn-next:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-restart {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-restart:hover {
+            background-color: #cbd5e1;
+        }
+
+        .results-screen {
+            text-align: center;
+            display: none;
+            padding: 20px 0;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 480px) {
+            .container { padding: 20px 14px; }
+            h2 { font-size: 1.25rem; }
+            .statement-card { font-size: 1rem; padding: 16px; }
+            .options-container { gap: 12px; }
+            .btn-choice { padding: 14px; font-size: 1rem; }
+            .controls { flex-direction: column; align-items: center; }
+            .btn-nav { width: 100%; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="game-zone">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <h2>Richtig oder Falsch?</h2>
+        
+        <div class="statement-card" id="statement-text"></div>
+
+        <div class="options-container">
+            <button class="btn-choice" id="btn-true" onclick="handleAnswer(true)">Richtig</button>
+            <button class="btn-choice" id="btn-false" onclick="handleAnswer(false)">Falsch</button>
+        </div>
+
+        <div class="feedback-box" id="feedback"></div>
+    </div>
+
+    <div class="results-screen" id="results-zone">
+        <h2 style="color: var(--success-color); margin-bottom: 12px;">Übung beendet! 🎉</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 24px;" id="score-text"></p>
+    </div>
+
+    <div class="controls">
+        <button class="btn-nav btn-restart" onclick="restartQuiz()">Neustart</button>
+        <button class="btn-nav btn-next" id="next-btn" onclick="nextQuestion()">Weiter</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            statement: "Wenn mein терпение лопнуло, dann bin ich absolut ruhig und vergebe der Person.",
+            expected: false,
+            explanation: "Das Gegenteil ist der Fall! Es bedeutet, dass der Geduldsfaden gerissen ist und man eben nicht mehr ruhig bleiben kann."
+        },
+        {
+            statement: "Das russische Wort »терпение« bedeutet übersetzt »Geduld«.",
+            expected: true,
+            explanation: "Völlig richtig! Es leitet sich vom Verb терпеть (erdulden/ertragen) ab."
+        },
+        {
+            statement: "Das Verb »лопнуло« kommt in dieser Redewendung von der Vorstellung, dass eine Blase oder ein Seil (Geduldsfaden) platzt bzw. reißt.",
+            expected: true,
+            explanation: "Genau! Wörtlich übersetzt heißt es 'geplatzt' oder 'gerissen'."
+        },
+        {
+            statement: "Den Ausdruck »Всё, моё терпение лопнуло!« nutzt man vor allem dann, wenn man sich über eine freudige Überraschung beschwert.",
+            expected: false,
+            explanation: "Falsch. Der Ausdruck drückt Frustration, Ärger oder das Erreichen einer klaren Toleranzgrenze aus, keine Freude."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const q = questions[currentIdx];
+        document.getElementById('statement-text').textContent = q.statement;
+        document.getElementById('progress').style.width = ((currentIdx + 1) / questions.length * 100) + '%';
+        
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+
+        // Buttons zurücksetzen
+        const btnTrue = document.getElementById('btn-true');
+        const btnFalse = document.getElementById('btn-false');
+        
+        btnTrue.className = 'btn-choice';
+        btnFalse.className = 'btn-choice';
+    }
+
+    function handleAnswer(selectedAnswer) {
+        const q = questions[currentIdx];
+        const btnTrue = document.getElementById('btn-true');
+        const btnFalse = document.getElementById('btn-false');
+        const feedback = document.getElementById('feedback');
+
+        // Beide Buttons sperren
+        btnTrue.classList.add('disabled');
+        btnFalse.classList.add('disabled');
+
+        const isCorrect = (selectedAnswer === q.expected);
+
+        if (isCorrect) {
+            score++;
+            feedback.className = 'feedback-box success';
+            feedback.innerHTML = `<strong>Richtig!</strong><br>${q.explanation}`;
+            if (selectedAnswer) btnTrue.classList.add('correct');
+            else btnFalse.classList.add('correct');
+        } else {
+            feedback.className = 'feedback-box error';
+            feedback.innerHTML = `<strong>Leider falsch.</strong><br>${q.explanation}`;
+            if (selectedAnswer) btnTrue.classList.add('wrong');
+            else btnFalse.classList.add('wrong');
+            
+            // Richtigen Button anzeigen
+            if (q.expected) btnTrue.classList.add('correct');
+            else btnFalse.classList.add('correct');
+        }
+
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('game-zone').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        
+        const resultsZone = document.getElementById('results-zone');
+        resultsZone.style.display = 'block';
+        document.getElementById('score-text').innerHTML = `Du hast <strong>${score}</strong> von <strong>${questions.length}</strong> Aussagen richtig bewertet.`;
+    }
+
+    function restartQuiz() {
+        currentIdx = 0;
+        score = 0;
+        document.getElementById('game-zone').style.display = 'block';
+        document.getElementById('results-zone').style.display = 'none';
+        loadQuestion();
+    }
+
+    window.onload = loadQuestion;
+</script>
+
+</body>
+</html>
