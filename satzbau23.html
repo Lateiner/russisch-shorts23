@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Satzbau-Puzzle</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 24px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 16.6%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            min-height: 44px;
+        }
+
+        .zone-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .words-pool, .solution-zone {
+            background-color: #f1f5f9;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 85px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-content: center;
+            margin-bottom: 20px;
+        }
+
+        .solution-zone {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+        }
+
+        .word-token {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: all 0.2s;
+        }
+
+        @media (hover: hover) {
+            .word-token:hover:not(.wrong) {
+                transform: translateY(-2px);
+                border-color: var(--primary-color);
+            }
+        }
+
+        .word-token.correct-flash {
+            background-color: #ecfdf5;
+            border-color: var(--success-color);
+            color: #065f46;
+        }
+
+        .word-token.wrong {
+            background-color: #fef2f2;
+            border-color: var(--error-color);
+            color: #991b1b;
+            animation: shake 0.4s ease;
+        }
+
+        .feedback-box {
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            margin-bottom: 20px;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+            color: #166534;
+            animation: slideIn 0.3s ease;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            max-width: 180px;
+            text-align: center;
+        }
+
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+            display: none;
+        }
+
+        .btn-next:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-restart {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-restart:hover {
+            background-color: #cbd5e1;
+        }
+
+        .results-screen {
+            text-align: center;
+            display: none;
+            padding: 20px 0;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 16px; }
+            h2 { font-size: 1.25rem; }
+            .word-token { padding: 8px 12px; font-size: 0.95rem; }
+            .controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="game-zone">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <h2>Bilde den richtigen Satz</h2>
+        <div class="instructions" id="instruction-text"></div>
+
+        <div class="zone-title">Verfügbare Wörter</div>
+        <div class="words-pool" id="pool"></div>
+
+        <div class="zone-title">Deine Übersetzung</div>
+        <div class="solution-zone" id="solution"></div>
+
+        <div class="feedback-box" id="feedback"></div>
+    </div>
+
+    <div class="results-screen" id="results-zone">
+        <h2 style="color: var(--success-color); margin-bottom: 12px;">Ausgezeichnet! 🎉</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 24px;">Du hast alle Sätze erfolgreich fehlerfrei aufgebaut und die Grammatik gemeistert!</p>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-restart" onclick="restartGame()">Neustart</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextSentence()">Weiter</button>
+    </div>
+</div>
+
+<script>
+    const sentences = [
+        {
+            hint: "Das Kernbeispiel: 'Schluss jetzt, mein Geduldsfaden ist gerissen, wir sind keine Freunde mehr!'",
+            sequence: ["Всё,", "моё", "терпение", "лопнуло,", "мы", "больше", "не", "друзья!"],
+            translation: "Всё, моё терпение лопнуло, мы больше не друзья!"
+        },
+        {
+            hint: "Übersetze: 'Haben Sie diese Redewendung gehört?'",
+            sequence: ["Вы", "слышали", "это", "выражение?"],
+            translation: "Вы слышали это выражение?"
+        },
+        {
+            hint: "Übersetze: 'Es bedeutet, dass ich nicht mehr ruhig sein kann.'",
+            sequence: ["Это", "значит,", "что", "я", "больше", "не", "могу", "быть", "спокойным."],
+            translation: "Это значит, что я больше не могу быть спокойным."
+        },
+        {
+            hint: "Übersetze: 'Mein Freund hat mich schon mehrmals angelogen.'",
+            sequence: ["Мой", "друг", "уже", "несколько", "раз", "обманывал", "меня."],
+            translation: "Мой друг уже несколько раз обманывал меня."
+        },
+        {
+            hint: "Übersetze: 'Das ist nicht normal!'",
+            sequence: ["Это", "не", "нормально!"],
+            translation: "Это не нормально!"
+        },
+        {
+            hint: "Übersetze: 'Schreiben Sie Ihr Beispiel in den Kommentaren.'",
+            sequence: ["Напишите", "ваш", "пример", "в", "комментариях."],
+            translation: "Напишите ваш пример в комментариях."
+        }
+    ];
+
+    let currentSentenceIdx = 0;
+    let currentWordIdx = 0; // Welcher Index in der korrekten Reihe wird als nächstes gesucht?
+    let poolIndices = [];
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function loadSentence() {
+        const s = sentences[currentSentenceIdx];
+        document.getElementById('instruction-text').innerHTML = `<strong>Missionsziel:</strong> ${s.hint}`;
+        document.getElementById('progress').style.width = ((currentSentenceIdx + 1) / sentences.length * 100) + '%';
+        
+        document.getElementById('solution').innerHTML = '';
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+
+        currentWordIdx = 0;
+        
+        // Indizes mischen, um die Wörter durcheinander anzuzeigen
+        poolIndices = Array.from({length: s.sequence.length}, (_, i) => i);
+        shuffle(poolIndices);
+
+        renderPool();
+    }
+
+    function renderPool() {
+        const poolContainer = document.getElementById('pool');
+        poolContainer.innerHTML = '';
+
+        const s = sentences[currentSentenceIdx];
+
+        poolIndices.forEach(idx => {
+            const token = document.createElement('div');
+            token.className = 'word-token';
+            token.textContent = s.sequence[idx];
+            token.onclick = () => handleWordClick(token, idx);
+            poolContainer.appendChild(token);
+        });
+    }
+
+    function handleWordClick(tokenElement, clickedIdx) {
+        // Wenn das angeklickte Wort genau das Wort ist, das als nächstes im Satz kommen MUSS
+        if (clickedIdx === currentWordIdx) {
+            const s = sentences[currentSentenceIdx];
+            
+            // Aus dem verfügbaren Pool löschen
+            poolIndices = poolIndices.filter(i => i !== clickedIdx);
+            
+            // Element unten in die Lösung schieben
+            const solutionContainer = document.getElementById('solution');
+            const solvedToken = document.createElement('div');
+            solvedToken.className = 'word-token correct-flash';
+            solvedToken.textContent = s.sequence[clickedIdx];
+            solutionContainer.appendChild(solvedToken);
+            
+            // War es das letzte Wort des Satzes?
+            currentWordIdx++;
+            if (currentWordIdx === s.sequence.length) {
+                const fb = document.getElementById('feedback');
+                fb.style.display = 'block';
+                fb.innerHTML = `<strong>Perfekt zusammengebaut!</strong><br>»${s.translation}«`;
+                document.getElementById('next-btn').style.display = 'block';
+            }
+            
+            renderPool();
+        } else {
+            // Direktes Fehler-Feedback: Wort wackelt rot und bleibt oben im Pool
+            tokenElement.classList.add('wrong');
+            setTimeout(() => {
+                tokenElement.classList.remove('wrong');
+            }, 400);
+        }
+    }
+
+    function nextSentence() {
+        currentSentenceIdx++;
+        if (currentSentenceIdx < sentences.length) {
+            loadSentence();
+        } else {
+            document.getElementById('game-zone').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('results-zone').style.display = 'block';
+        }
+    }
+
+    function restartGame() {
+        currentSentenceIdx = 0;
+        document.getElementById('game-zone').style.display = 'block';
+        document.getElementById('results-zone').style.display = 'none';
+        loadSentence();
+    }
+
+    window.onload = loadSentence;
+</script>
+
+</body>
+</html>
