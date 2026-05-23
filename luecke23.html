@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Lückentext</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 28px;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 28px;
+            line-height: 1.4;
+        }
+
+        .text-block {
+            font-size: 1.2rem;
+            line-height: 2.3;
+            color: var(--text-color);
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 24px;
+            text-align: justify;
+        }
+
+        /* Styling für die Dropdown-Lücken */
+        .gap-select {
+            display: inline-block;
+            font-size: 1.05rem;
+            font-weight: 600;
+            padding: 4px 28px 4px 10px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            background-color: #fff;
+            color: var(--primary-color);
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%233b82f6' viewBox='0 0 16 16'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 10px) center;
+            margin: 4px;
+            vertical-align: middle;
+        }
+
+        .gap-select:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .gap-select.correct {
+            border-color: var(--success-color);
+            color: #065f46;
+            background-color: #ecfdf5;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2310b981' viewBox='0 0 16 16'><path d='M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022z'/></svg>");
+            pointer-events: none;
+        }
+
+        .gap-select.wrong {
+            border-color: var(--error-color);
+            color: #991b1b;
+            background-color: #fef2f2;
+            animation: shake 0.4s ease;
+        }
+
+        .feedback-box {
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            margin-bottom: 20px;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+            color: #166534;
+            animation: slideIn 0.3s ease;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #e2e8f0;
+            color: #475569;
+            width: 100%;
+            max-width: 180px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #cbd5e1;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 480px) {
+            .container { padding: 20px 14px; }
+            h2 { font-size: 1.25rem; }
+            .text-block { font-size: 1.05rem; line-height: 2.6; padding: 14px; }
+            .gap-select { font-size: 0.95rem; padding: 6px 24px 6px 8px; margin: 2px; }
+            .btn { max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Lückentext ausfüllen</h2>
+    <div class="instructions">
+        Wähle für jede Lücke das passende russische Wort aus, um den gelernten Text sinnvoll zu vervollständigen.
+    </div>
+
+    <div class="text-block">
+        <!-- Satz 1 -->
+        Друг опять 
+        <select class="gap-select" id="gap1" onchange="checkGap(1, 'обманул')">
+            <option value="" disabled selected>...</option>
+            <option value="помог">помог (geholfen)</option>
+            <option value="обманул">обманул (angelogen)</option>
+            <option value="забыл">забыл (vergessen)</option>
+        </select>
+        меня. 
+        
+        <!-- Satz 2 -->
+        Я говорю: Всё, моё 
+        <select class="gap-select" id="gap2" onchange="checkGap(2, 'терпение')">
+            <option value="" disabled selected>...</option>
+            <option value="солнце">солнце (Sonne)</option>
+            <option value="время">время (Zeit)</option>
+            <option value="терпение">терпение (Geduld)</option>
+        </select>
+        <select class="gap-select" id="gap3" onchange="checkGap(3, 'лопнуло')">
+            <option value="" disabled selected>...</option>
+            <option value="лопнуло">лопнуло (gerissen)</option>
+            <option value="устало">устало (müde geworden)</option>
+            <option value="кончилось">кончилось (geendet)</option>
+        </select>!
+        
+        <!-- Satz 3 (Neu) -->
+        Мы больше не 
+        <select class="gap-select" id="gap4" onchange="checkGap(4, 'друзья')">
+            <option value="" disabled selected>...</option>
+            <option value="соседи">соседи (Nachbarn)</option>
+            <option value="друзья">друзья (Freunde)</option>
+            <option value="коллеги">коллеги (Kollegen)</option>
+        </select>.
+        
+        <!-- Satz 4 (Neu) -->
+        Я больше не могу быть 
+        <select class="gap-select" id="gap5" onchange="checkGap(5, 'спокойным')">
+            <option value="" disabled selected>...</option>
+            <option value="весёлым">весёлым (lustig)</option>
+            <option value="занятым">занятым (beschäftigt)</option>
+            <option value="спокойным">спокойным (ruhig)</option>
+        </select>.
+        
+        <!-- Satz 5 (Neu) -->
+        Это очень плохое 
+        <select class="gap-select" id="gap6" onchange="checkGap(6, 'поведение')">
+            <option value="" disabled selected>...</option>
+            <option value="поведение">поведение (Verhalten)</option>
+            <option value="слово">слово (Wort)</option>
+            <option value="утро">утро (Morgen)</option>
+        </select>!
+    </div>
+
+    <div class="feedback-box" id="feedback-success">
+        <strong>Ausgezeichnet! 🎉</strong><br>
+        Du hast die gesamte Geschichte fehlerfrei rekonstruiert!<br>
+        <span style="display:block; margin-top: 8px; font-size: 0.9rem; color: #475569; line-height: 1.4;">
+            <em>Übersetzung: Der Freund hat mich wieder angelogen. Ich sage: Alles, meine Geduld ist gerissen! Wir sind keine Freunde mehr. Ich kann nicht mehr ruhig bleiben. Das ist ein sehr schlechtes Verhalten!</em>
+        </span>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="resetQuiz()">Zurücksetzen</button>
+    </div>
+</div>
+
+<script>
+    // Speichert den Zustand aller 6 Lücken
+    let gapStates = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
+
+    function checkGap(gapId, correctValue) {
+        const select = document.getElementById(`gap${gapId}`);
+        const selectedValue = select.value;
+
+        if (selectedValue === correctValue) {
+            select.classList.remove('wrong');
+            select.classList.add('correct');
+            gapStates[gapId] = true;
+            
+            checkOverallSuccess();
+        } else {
+            select.classList.add('wrong');
+            gapStates[gapId] = false;
+            
+            setTimeout(() => {
+                select.classList.remove('wrong');
+            }, 400);
+        }
+    }
+
+    function checkOverallSuccess() {
+        // Prüft, ob alle 6 Lücken auf true stehen
+        const allCorrect = Object.values(gapStates).every(state => state === true);
+        if (allCorrect) {
+            document.getElementById('feedback-success').style.display = 'block';
+        }
+    }
+
+    function resetQuiz() {
+        gapStates = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
+        document.getElementById('feedback-success').style.display = 'none';
+
+        for (let i = 1; i <= 6; i++) {
+            const select = document.getElementById(`gap${i}`);
+            select.className = 'gap-select';
+            select.selectedIndex = 0;
+            select.style.pointerEvents = 'auto';
+        }
+    }
+</script>
+
+</body>
+</html>
