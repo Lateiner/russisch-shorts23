@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Situationen zuordnen</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 24px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 33.3%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .context-text {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            min-height: 60px;
+        }
+
+        .illustration-container {
+            width: 100%;
+            max-width: 260px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .illustration {
+            width: 100%;
+            height: auto;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .speech-bubble-option {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .speech-bubble-option:not(.disabled):hover {
+                border-color: var(--primary-color);
+                background-color: #f0f7ff;
+                transform: translateY(-2px);
+            }
+        }
+
+        .speech-bubble-option.correct {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+            color: #065f46;
+            transform: scale(1.02);
+        }
+
+        .speech-bubble-option.wrong {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+            color: #991b1b;
+            animation: shake 0.4s ease;
+        }
+
+        .speech-bubble-option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .speech-bubble-option.disabled.correct, 
+        .speech-bubble-option.disabled.wrong {
+            opacity: 1;
+        }
+
+        .feedback-box {
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .feedback-box.success {
+            display: block;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+            color: #166534;
+        }
+
+        .feedback-box.error {
+            display: block;
+            background-color: #fff5f5;
+            border-left: 4px solid var(--error-color);
+            color: #991b1b;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .btn-restart {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-restart:hover {
+            background-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+            display: none;
+        }
+
+        .btn-next:hover {
+            background-color: #2563eb;
+        }
+
+        .results-screen {
+            text-align: center;
+            display: none;
+            padding: 20px 0;
+        }
+
+        .results-title {
+            font-size: 1.8rem;
+            color: var(--success-color);
+            margin-bottom: 12px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 16px; }
+            h2 { font-size: 1.2rem; }
+            .speech-bubble-option { padding: 14px; font-size: 1rem; }
+            .controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="game-zone">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <h2 id="question-title">Welche Reaktion passt?</h2>
+        <div class="context-text" id="context"></div>
+
+        <div class="illustration-container">
+            <!-- Dynamische SVG-Gesichter passend zur Situation -->
+            <svg class="illustration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" id="avatar-svg"></svg>
+        </div>
+
+        <div class="options-container" id="options-box"></div>
+        <div class="feedback-box" id="feedback"></div>
+    </div>
+
+    <div class="results-screen" id="results-zone">
+        <div class="results-title">Übung beendet!</div>
+        <p style="font-size: 1.1rem; margin-bottom: 24px;" id="score-text"></p>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-restart" onclick="restartQuiz()">Neustart</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">Weiter</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            context: "Ein Freund hat dich schon mehrmals angelogen. Jetzt stellt sich heraus, dass er dich gerade wieder belogen hat. Du ziehst eine klare Grenze.",
+            avatarColor: "#fed7aa", // Orange-Hautton (Wut)
+            avatarExpression: `<circle cx="100" cy="100" r="80" fill="#f1f5f9" /><circle cx="100" cy="95" r="45" fill="#475569" /><circle cx="100" cy="100" r="40" fill="#fed7aa" /><path d="M 60 90 Q 100 70 140 90 Q 100 85 60 90" fill="#475569" /><path d="M 72 88 L 90 94" stroke="#1e293b" stroke-width="3" stroke-linecap="round" /><path d="M 128 88 L 110 94" stroke="#1e293b" stroke-width="3" stroke-linecap="round" /><circle cx="82" cy="104" r="4" fill="#1e293b" /><circle cx="118" cy="104" r="4" fill="#1e293b" /><path d="M 85 125 Q 100 115 115 125" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" /><path d="M 145 65 L 155 75 M 155 65 L 145 75" stroke="#ef4444" stroke-width="3" stroke-linecap="round" />`,
+            options: [
+                { text: "Ничего страшного, всё нормально.", isCorrect: false, hint: "Das bedeutet 'Nicht schlimm, alles normal.' – Du bist aber wütend!" },
+                { text: "Всё, моё терпение лопнуло!", isCorrect: true, hint: "Richtig! Du kannst und willst hier nicht mehr ruhig bleiben." },
+                { text: "Большое спасибо за это.", isCorrect: false, hint: "Das bedeutet 'Vielen Dank dafür.' – Sarkasmus ist hier nicht gesucht." }
+            ]
+        },
+        {
+            context: "Es regnet in Strömen. Du wartest seit 45 Minuten auf den Bus, der eigentlich alle 10 Minuten kommen sollte. Jetzt fährt er einfach ohne zu halten an dir vorbei.",
+            avatarColor: "#93c5fd", // Bläulicher Hautton (Frust/Kälte)
+            avatarExpression: `<circle cx="100" cy="100" r="80" fill="#f1f5f9" /><circle cx="100" cy="95" r="45" fill="#334155" /><circle cx="100" cy="100" r="40" fill="#bae6fd" /><path d="M 75 92 Q 85 96 95 92" stroke="#1e293b" stroke-width="3" fill="none" /><path d="M 125 92 Q 115 96 105 92" stroke="#1e293b" stroke-width="3" fill="none" /><circle cx="85" cy="104" r="3.5" fill="#1e293b" /><circle cx="115" cy="104" r="3.5" fill="#1e293b" /><path d="M 80 130 Q 100 110 120 130" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" /><path d="M 85 112 L 85 122 M 115 112 L 115 122" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />`,
+            options: [
+                { text: "Всё нормально, это хорошо.", isCorrect: false, hint: "Das bedeutet 'Alles normal, das ist gut.' – Im strömenden Regen bestimmt nicht!" },
+                { text: "Я очень люблю долго ждать.", isCorrect: false, hint: "Das bedeutet 'Ich warte sehr gerne lange.' – Das stimmt wohl kaum." },
+                { text: "У меня просто терпение лопнуло!", isCorrect: true, hint: "Perfekt! 'Meine Geduld ist einfach am Ende!' Nach 45 Minuten im Regen absolut verständlich." }
+            ]
+        },
+        {
+            context: "Du schreibst seit fünf Stunden an einer wichtigen Hausarbeit. Plötzlich stürzt der Computer ab und deine Datei ist komplett gelöscht. Nichts lässt sich wiederherstellen.",
+            avatarColor: "#fca5a5", // Roter Hautton (Verzweiflung/Wut)
+            avatarExpression: `<circle cx="100" cy="100" r="80" fill="#f1f5f9" /><circle cx="100" cy="95" r="45" fill="#1e293b" /><circle cx="100" cy="100" r="40" fill="#fca5a5" /><path d="M 70 85 L 90 95 M 90 85 L 70 95" stroke="#1e293b" stroke-width="3" /><path d="M 130 85 L 110 95 M 110 85 L 130 95" stroke="#1e293b" stroke-width="3" /><circle cx="100" cy="125" r="14" fill="none" stroke="#1e293b" stroke-width="4" /><path d="M 60 65 L 50 55 M 140 65 L 150 55" stroke="#ef4444" stroke-width="4" stroke-linecap="round" />`,
+            options: [
+                { text: "Всё, моё терпение лопнуло!", isCorrect: true, hint: "Genau! Das ist der absolute Worst-Case-Moment, in dem man fassungslos die Geduld verliert." },
+                { text: "Я спокоен, всё идёт нормально.", isCorrect: false, hint: "Das bedeutet 'Ich bin ruhig, alles läuft normal.' – Völlig unpassend bei Datenverlust!" },
+                { text: "Это отличный компьютер.", isCorrect: false, hint: "Das bedeutet 'Das ist ein großartiger Computer.' – Wohl eher das Gegenteil." }
+            ]
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const q = questions[currentIdx];
+        document.getElementById('context').textContent = q.context;
+        document.getElementById('avatar-svg').innerHTML = q.avatarExpression;
+        document.getElementById('progress').style.width = ((currentIdx + 1) / questions.length * 100) + '%';
+        
+        const box = document.getElementById('options-box');
+        box.innerHTML = '';
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+
+        q.options.forEach(opt => {
+            const div = document.createElement('div');
+            div.className = 'speech-bubble-option';
+            div.textContent = opt.text;
+            div.onclick = () => handleChoice(div, opt);
+            box.appendChild(div);
+        });
+    }
+
+    function handleChoice(selectedDiv, option) {
+        const buttons = document.querySelectorAll('.speech-bubble-option');
+        buttons.forEach(b => b.classList.add('disabled'));
+
+        const fb = document.getElementById('feedback');
+        if (option.isCorrect) {
+            selectedDiv.classList.add('correct');
+            fb.className = 'feedback-box success';
+            fb.innerHTML = `<strong>Richtig!</strong><br>${option.hint}`;
+            score++;
+        } else {
+            selectedDiv.classList.add('wrong');
+            fb.className = 'feedback-box error';
+            fb.innerHTML = `<strong>Leider nicht richtig.</strong><br>${option.hint}`;
+            
+            buttons.forEach((b, i) => {
+                if (questions[currentIdx].options[i].isCorrect) b.classList.add('correct');
+            });
+        }
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('game-zone').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        
+        const resultsZone = document.getElementById('results-zone');
+        resultsZone.style.display = 'block';
+        document.getElementById('score-text').innerHTML = `Du hast <strong>${score}</strong> von <strong>${questions.length}</strong> Situationen richtig eingeschätzt.`;
+    }
+
+    function restartQuiz() {
+        currentIdx = 0;
+        score = 0;
+        document.getElementById('game-zone').style.display = 'block';
+        document.getElementById('results-zone').style.display = 'none';
+        loadQuestion();
+    }
+
+    window.onload = loadQuestion;
+</script>
+
+</body>
+</html>
