@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Multiple-Choice</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 28px;
+        }
+
+        .quiz-header {
+            margin-bottom: 24px;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 1.35rem;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .option-btn {
+            width: 100%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 1.05rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Hover-Effekte nur für Geräte mit Maus */
+        @media (hover: hover) {
+            .option-btn:not(.disabled):hover {
+                border-color: var(--primary-color);
+                background-color: #f0f7ff;
+            }
+        }
+
+        .option-btn.correct {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+            color: #065f46;
+            font-weight: 600;
+        }
+
+        .option-btn.wrong {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+            color: #991b1b;
+        }
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+        }
+
+        .feedback-box {
+            min-height: 60px;
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            animation: slideIn 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .feedback-box.success {
+            display: block;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+            color: #166534;
+        }
+
+        .feedback-box.error {
+            display: block;
+            background-color: #fff5f5;
+            border-left: 4px solid var(--error-color);
+            color: #991b1b;
+        }
+
+        .controls-area {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-action {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Für sehr kleine Bildschirme */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 16px;
+            }
+            h2 {
+                font-size: 1.2rem;
+            }
+            .option-btn {
+                padding: 14px;
+                font-size: 0.95rem;
+            }
+            .controls-area {
+                flex-direction: column;
+            }
+            .btn-action {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="quiz-header">
+        <span class="badge">Bedeutung</span>
+        <h2>Was bedeutet der Ausdruck терпение лопнуло wörtlich?</h2>
+    </div>
+
+    <div class="options-list" id="options-container">
+        <!-- Optionen werden per JavaScript eingefügt -->
+    </div>
+
+    <div class="feedback-box" id="feedback-message"></div>
+    
+    <div class="controls-area">
+        <button class="btn-action btn-secondary" id="restart-btn" onclick="resetQuiz()">Neustart</button>
+    </div>
+</div>
+
+<script>
+    const quizData = {
+        options: [
+            { text: "Die Geduld schläft.", isCorrect: false },
+            { text: "Die Geduld ist geplatzt.", isCorrect: true },
+            { text: "Die Geduld ist groß.", isCorrect: false }
+        ],
+        explanation: "Richtig! Das Verb лопнуть bedeutet 'platzen' oder 'reißen' (wie ein Geduldsfaden oder ein Ballon)."
+    };
+
+    function loadQuiz() {
+        const container = document.getElementById('options-container');
+        const feedback = document.getElementById('feedback-message');
+        
+        container.innerHTML = '';
+        feedback.style.display = 'none';
+        feedback.className = 'feedback-box';
+
+        quizData.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn';
+            button.textContent = option.text;
+            button.onclick = () => checkAnswer(button, option.isCorrect);
+            container.appendChild(button);
+        });
+    }
+
+    function checkAnswer(selectedButton, isCorrect) {
+        const buttons = document.querySelectorAll('.option-btn');
+        const feedback = document.getElementById('feedback-message');
+
+        // Alle Knöpfe deaktivieren, damit man nach der Auswahl nicht mehr klicken kann
+        buttons.forEach(btn => {
+            btn.classList.add('disabled');
+            btn.onclick = null; 
+        });
+
+        if (isCorrect) {
+            selectedButton.classList.add('correct');
+            feedback.textContent = quizData.explanation;
+            feedback.className = 'feedback-box success';
+        } else {
+            selectedButton.classList.add('wrong');
+            feedback.textContent = "Leider nicht richtig. Denk an das Bild eines Ballons, der zu voll wird und platzt.";
+            feedback.className = 'feedback-box error';
+            
+            // Richtige Option zusätzlich hervorheben, um den Lerneffekt zu steigern
+            buttons.forEach((btn, index) => {
+                if (quizData.options[index].isCorrect) {
+                    btn.classList.add('correct');
+                }
+            });
+        }
+    }
+
+    function resetQuiz() {
+        loadQuiz();
+    }
+
+    // Quiz initialisieren
+    window.onload = loadQuiz;
+</script>
+
+</body>
+</html>
