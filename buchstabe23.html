@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Buchstabensalat</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 28px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 25%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .sentence-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            font-size: 1.3rem;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .word-gap {
+            display: inline-block;
+            min-width: 100px;
+            border-bottom: 3px solid var(--primary-color);
+            padding: 0 4px;
+            color: var(--primary-color);
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .word-gap.completed {
+            border-bottom-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .zone-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .letters-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            min-height: 60px;
+            margin-bottom: 24px;
+        }
+
+        .letter-btn {
+            background-color: #fff;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: all 0.15s ease;
+        }
+
+        @media (hover: hover) {
+            .letter-btn:hover:not(.wrong) {
+                border-color: var(--primary-color);
+                background-color: #f0f7ff;
+                transform: translateY(-2px);
+            }
+        }
+
+        .letter-btn.wrong {
+            background-color: #fef2f2;
+            border-color: var(--error-color);
+            color: #991b1b;
+            animation: shake 0.4s ease;
+        }
+
+        .feedback-box {
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            margin-bottom: 20px;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+            color: #166534;
+            animation: slideIn 0.3s ease;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            max-width: 180px;
+            text-align: center;
+        }
+
+        .btn-restart {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-restart:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+            display: none;
+        }
+
+        .btn-next:hover {
+            background-color: #2563eb;
+        }
+
+        .end-screen {
+            text-align: center;
+            display: none;
+            padding: 20px 0;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 20px 14px; }
+            h2 { font-size: 1.25rem; }
+            .sentence-box { font-size: 1.1rem; padding: 16px; }
+            .letter-btn { width: 42px; height: 42px; font-size: 1.1rem; border-radius: 8px; }
+            .controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="game-zone">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <h2>Rechtschreibung trainieren</h2>
+        <div class="instructions" id="instruction-text"></div>
+
+        <div class="sentence-box" id="sentence-display"></div>
+
+        <div class="zone-title">Buchstabensalat</div>
+        <div class="letters-pool" id="pool"></div>
+
+        <div class="feedback-box" id="feedback-success"></div>
+    </div>
+
+    <div class="end-screen" id="end-zone">
+        <h2 style="color: var(--success-color); margin-bottom: 12px;">Klasse Leistung! 🎉</h2>
+        <p style="font-size: 1.1rem;">Du hast alle Sätze erfolgreich vervollständigt und die Rechtschreibung fehlerfrei gemeistert!</p>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-restart" onclick="restartQuiz()">Neustart</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextSentence()">Weiter</button>
+    </div>
+</div>
+
+<script>
+    const dataset = [
+        {
+            beforeGap: "Всё, моё ",
+            afterGap: ", мы больше не друзья!",
+            target: "лопнуло",
+            hint: "Bilde das fehlende Wort <strong>»лопнуло«</strong> (gerissen/geplatzt).",
+            feedback: "<strong>Genial gelöst!</strong> Du hast das Wort <strong>лопнуло</strong> fehlerfrei buchstabiert. Denk an das doppelte <strong>о</strong>!"
+        },
+        {
+            beforeGap: "Моё ",
+            afterGap: " не вечно, прекрати это!",
+            target: "терпение",
+            hint: "Bilde das fehlende Wort <strong>»терпение«</strong> (Gedulden/Geduld).",
+            feedback: "<strong>Super!</strong> Das Wort <strong>терпение</strong> (Geduld) leitet sich übrigens vom Verb <em>терпеть</em> ab."
+        },
+        {
+            beforeGap: "Ты должен быть ",
+            afterGap: " и не кричать.",
+            target: "спокойным",
+            hint: "Bilde das fehlende Wort <strong>»спокойным«</strong> (ruhig [im Instrumental]).",
+            feedback: "<strong>Ausgezeichnet!</strong> Das Wort <strong>спокойным</strong> bedeutet hier 'ruhig'."
+        },
+        {
+            beforeGap: "Мой друг всегда говорит ",
+            afterGap: ", я ему верю.",
+            target: "правду",
+            hint: "Bilde das fehlende Wort <strong>»правду«</strong> (die Wahrheit [im Akkusativ]).",
+            feedback: "<strong>Ganz genau!</strong> <strong>правду</strong> kommt von <em>правда</em> (Wahrheit)."
+        }
+    ];
+
+    let currentIdx = 0;
+    let currentInput = "";
+    let letterPool = [];
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function loadSentence() {
+        const currentData = dataset[currentIdx];
+        currentInput = "";
+        
+        // UI zurücksetzen
+        document.getElementById('feedback-success').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('instruction-text').innerHTML = currentData.hint;
+        document.getElementById('progress').style.width = ((currentIdx + 1) / dataset.length * 100) + '%';
+
+        // Satz-Box aufbauen
+        const sentenceBox = document.getElementById('sentence-display');
+        sentenceBox.innerHTML = `${currentData.beforeGap}<span class="word-gap" id="gap-display">${"_".repeat(currentData.target.length)}</span>${currentData.afterGap}`;
+
+        // Pool mischen
+        letterPool = currentData.target.split('').map((char, index) => {
+            return { id: index, letter: char };
+        });
+        shuffle(letterPool);
+        
+        renderPool();
+    }
+
+    function renderPool() {
+        const poolContainer = document.getElementById('pool');
+        poolContainer.innerHTML = '';
+
+        letterPool.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'letter-btn';
+            btn.textContent = item.letter;
+            btn.onclick = () => handleLetterClick(btn, item);
+            poolContainer.appendChild(btn);
+        });
+    }
+
+    function handleLetterClick(btnElement, item) {
+        const currentData = dataset[currentIdx];
+        const expectedLetter = currentData.target[currentInput.length];
+
+        if (item.letter === expectedLetter) {
+            currentInput += item.letter;
+            
+            // Aus dem Pool löschen
+            letterPool = letterPool.filter(poolItem => poolItem.id !== item.id);
+            
+            // Lücke updaten
+            const gap = document.getElementById('gap-display');
+            const remainingUnderscores = "_".repeat(currentData.target.length - currentInput.length);
+            gap.textContent = currentInput + remainingUnderscores;
+
+            if (currentInput === currentData.target) {
+                gap.className = "word-gap completed";
+                const fb = document.getElementById('feedback-success');
+                fb.innerHTML = currentData.feedback;
+                fb.style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+
+            renderPool();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => { btnElement.classList.remove('wrong'); }, 400);
+        }
+    }
+
+    function nextSentence() {
+        currentIdx++;
+        if (currentIdx < dataset.length) {
+            loadSentence();
+        } else {
+            document.getElementById('game-zone').style.display = 'none';
+            document.getElementById('end-zone').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'none';
+        }
+    }
+
+    function restartQuiz() {
+        currentIdx = 0;
+        document.getElementById('game-zone').style.display = 'block';
+        document.getElementById('end-zone').style.display = 'none';
+        loadSentence();
+    }
+
+    window.onload = loadSentence;
+</script>
+
+</body>
+</html>
