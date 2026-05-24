@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktive Russisch-Lernkartei</title>
+    <style>
+        :root {
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --primary-green: #16a34a;
+            --primary-hover: #15803d;
+            --accent-green: #bbf7d0;
+            --text-color: #166534;
+            --dark-text: #1f2937;
+            --shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.1), 0 8px 10px -6px rgba(22, 163, 74, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--dark-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 12px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--text-color);
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 550px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Fortschrittsanzeige */
+        .progress-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .progress-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-green);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 3D Flashcard Container */
+        .flashcard-wrapper {
+            perspective: 1000px;
+            width: 100%;
+            height: 280px;
+            cursor: pointer;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow);
+            border-radius: 16px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            background: var(--card-bg);
+            border: 2px solid var(--accent-green);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #f9fafb;
+            border-color: var(--primary-green);
+        }
+
+        /* Text-Styling auf der Karte */
+        .card-content {
+            font-weight: 700;
+            color: var(--dark-text);
+            word-wrap: break-word;
+            max-width: 100%;
+            transition: font-size 0.1s ease;
+        }
+
+        .card-front .card-content {
+            color: var(--primary-green);
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 12px;
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        /* Navigations- & Funktionsbuttons */
+        .control-row {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .btn {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            user-select: none;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-color);
+            border: 1px solid var(--primary-green);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f0fdf4;
+        }
+
+        /* Tastatur-Hilfe am Desktop */
+        .keyboard-info {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #6b7280;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .keyboard-key {
+            background: #e2e8f0;
+            border-radius: 4px;
+            padding: 2px 6px;
+            border: 1px solid #cbd5e1;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        /* Mobile Anpassungen */
+        @media (max-width: 480px) {
+            header h1 { font-size: 1.5rem; }
+            .flashcard-wrapper { height: 240px; }
+            .btn { padding: 10px 12px; font-size: 0.85rem; }
+            .keyboard-info { display: none; } /* Auf Mobile ausblenden */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Russisch-Vokabeltrainer</h1>
+    <p>Übe die Vokabeln interaktiv. Nutze Klicks oder deine Tastatur.</p>
+</header>
+
+<div class="main-container">
+    <!-- Fortschritt -->
+    <div class="progress-container">
+        <span class="progress-text" id="progress-text">0 / 0</span>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Karteikarte -->
+    <div class="flashcard-wrapper" onclick="flipCard()" aria-label="Karteikarte, zum Umdrehen klicken">
+        <div class="flashcard" id="card">
+            <div class="card-face card-front">
+                <div class="card-content" id="card-front-text">Vorderseite</div>
+                <div class="hint" id="card-front-note"></div>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-content" id="card-back-text">Rückseite</div>
+                <div class="hint" id="card-back-note"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hauptnavigation -->
+    <div class="control-row">
+        <button class="btn btn-secondary" onclick="prevCard()">← Vorherige</button>
+        <button class="btn" onclick="nextCard()">Nächste →</button>
+    </div>
+
+    <!-- Hilfsfunktionen -->
+    <div class="control-row">
+        <button class="btn btn-secondary" onclick="goToStart()">An den Anfang</button>
+        <button class="btn btn-secondary" onclick="shuffleCards()">🔀 Mischen</button>
+    </div>
+
+    <!-- Tastatur-Shortcuts für Desktops -->
+    <div class="keyboard-info">
+        <span class="keyboard-key">Leertaste</span> / <span class="keyboard-key">Enter</span>: Umdrehen &nbsp;|&nbsp; 
+        <span class="keyboard-key">←</span> / <span class="keyboard-key">→</span>: Navigieren &nbsp;|&nbsp; 
+        <span class="keyboard-key">Pos1 (Home)</span>: Anfang
+    </div>
+</div>
+
+<script>
+    // Rohdaten-Array (Vorderseite | Rückseite | Optionale Notiz Vorn | Optionale Notiz Hinten)
+    const rawData = [
+        ["1. всё", "alles"],
+        ["2. мой", "mein, meine, meiniges"],
+        ["3. терпе́ние", "die Geduld"],
+        ["4. ло́паться / ло́пнуть", "reißen, platzen"],
+        ["5. мы", "wir"],
+        ["6. бо́льше", "mehr", "", "(in Negation: nicht mehr)"],
+        ["7. не", "nicht"],
+        ["8. друг", "der Freund"],
+        ["9. ты", "du"],
+        ["10. дол́жен", "müssen, sollen, verpflichtet sein"],
+        ["11. быть / побы́ть", "sein"],
+        ["12. споко́йный", "ruhig"],
+        ["13. и", "und"],
+        ["14. крича́ть / закрича́ть", "schreien, rufen"],
+        ["15. всегда́", "immer"],
+        ["16. говори́ть / сказа́ть", "sagen, sprechen"],
+        ["17. пра́вда", "die Wahrheit"],
+        ["18. я", "ich"],
+        ["19. он", "er"],
+        ["20. ве́рить / пове́рить", "glauben"],
+        ["21. ситуа́ция", "die Situation"],
+        ["22. оцени́вать / оцени́ть", "einschätzen, bewerten"],
+        ["23. чита́ть / прочита́ть", "lesen"],
+        ["24. повседне́вный", "alltäglich"],
+        ["25. кли́кать / кли́кнуть", "klicken"],
+        ["26. вни́зу", "unten"],
+        ["27. на", "auf, in"],
+        ["28. коло́нка", "die Spalte"],
+        ["29. в", "in, in ... hinein"],
+        ["30. кото́рый", "welcher, der"],
+        ["31. подходи́ть / подойти́", "passen, herantreten"],
+        ["32. хорошо́", "gut"],
+        ["33. опла́чивать / оплати́ть", "bezahlen"],
+        ["34. обма́нывать / обману́ть", "anlügen, betrügen"],
+        ["35. уже́", "schon"],
+        ["36. опя́ть", "wieder, von neuem"],
+        ["37. fünf", "пять"],
+        ["38. раз", "das Mal"],
+        ["39. пра́вильно", "richtig"],
+        ["40. здесь", "hier"],
+        ["41. определённо", "definitiv, bestimmt"],
+        ["42. жда́ть / подожда́ть", "warten"],
+        ["43. авто́бус", "der Bus"],
+        ["44. соверше́нно", "vollkommen, völlig"],
+        ["45. причи́на", "der Grund"],
+        ["46. для", "für"],
+        ["47. волне́ние", "die Aufregung, die Unruhe"],
+        ["48. ма́ленький", "klein"],
+        ["49. брат", "der Bruder"],
+        ["50. броса́ть / бро́сить", "werfen"],
+        ["51. наме́ренно", "absichtlich"],
+        ["52. смартфо́н", "das Smartphone"],
+        ["53. земля́", "der Boden, die Erde"],
+        ["54. по́сле", "nach"],
+        ["55. того́", "dem, desselben"],
+        ["56. как", "wie, als"],
+        ["57. запреща́ть / запрети́ть", "verbieten"],
+        ["58. три", "drei"],
+        ["59. безусло́вно", "absolut, bedingungslos"],
+        ["60. не́сколько", "einige, mehrmals"],
+        ["61. предупрежде́ние", "die Warnung"],
+        ["62. грани́ца", "die Grenze"],
+        ["63. допусти́мый", "zulässig, tolerierbar"],
+        ["64. превыша́ть / превы́сить", "überschreiten"],
+        ["65. о́чередь", "die Schlange, die Reihe"],
+        ["66. ка́сса", "die Kasse"],
+        ["67. дли́нный", "lang"],
+        ["68. но", "aber"],
+        ["69. слу́шать / послу́шать", "hören, zuhören"],
+        ["70. рассла́бленно", "entspannt"],
+        ["71. му́зыка", "die Musik"],
+        ["72. тот", "derjenige"],
+        ["73. кто", "wer"],
+        ["74. остава́ться / оста́ться", "bleiben"],
+        ["75. контроли́ровать / сконтроли́ровать", "kontrollieren"],
+        ["76. свой", "sein, ihr, eigen"],
+        ["77. эмо́ция", "die Emotion"],
+        ["78. великоле́пно", "hervorragend"],
+        ["79. из", "aus"],
+        ["80. соверше́нно", "vollkommen, absolut"],
+        ["81. вечно", "ewig"],
+        ["82. прекраща́ть / прекрати́ть", "aufhören, einstellen"],
+        ["83. это", "das, dies"],
+        ["84. жаль", "schade, es tut leid"],
+        ["85. извиня́ть / извини́ть", "entschuldigen"],
+        ["86. выходно́й", "das Wochenende, der freie Tag"],
+        ["87. без", "ohne"],
+        ["88. вечери́нка", "die Party"],
+        ["89. идти́ / пойти́", "gehen"],
+        ["90. хотя́", "obwohl"],
+        ["91. догова́риваться / договори́ться", "sich verabreden, vereinbaren"],
+        ["92. сейчас", "jetzt"],
+        ["93. хвата́ть / хвати́ть", "reichen, genug sein"],
+        ["94. по́здно", "spät"],
+        ["95. выде́ргивать / вы́дернуть", "ziehen", "", "(die Notbremse ziehen)"],
+        ["96. шнур", "die Leine, die Schnur"],
+        ["97. выраже́ние", "der Ausdruck"],
+        ["98. проси́ть / попроси́ть", "bitten"],
+        ["99. проща́ть / прости́ть", "vergeben, verzeihen"],
+        ["100. обеща́ть / пообеща́ть", "versprechen"],
+        ["101. отны́не", "von nun an"],
+        ["102. че́стный", "ehrlich"],
+        ["103. мо́чь / смо́чь", "können"],
+        ["104. пока́", "tschüss, bis bald"],
+        ["105. после́довательный", "konsequent"],
+        ["106. то́чка", "der Punkt"],
+        ["107. зре́ние", "die Sicht", "", "(die Ansicht, der Standpunkt)"],
+        ["108. де́лать / сде́лать", "machen, tun"],
+        ["109. я́сный", "deutlich, klar"],
+        ["110. понима́ть / поня́ть", "verstehen"],
+        ["111. серди́тый", "sauer, zornig"],
+        ["112. за́втра", "morgen"],
+        ["113. поко́й", "die Ruhe", "", "(in Ruhe)"],
+        ["114. реше́ние", "die Entscheidung"],
+        ["115. принима́ть / приня́ть", "akzeptieren, annehmen"]
+    ];
+
+    // Strukturieren der Daten in nutzbare Objekte
+    let cards = rawData.map(item => ({
+        front: item[0] ? item[0].trim() : "",
+        back: item[1] ? item[1].trim() : "",
+        noteFront: item[2] ? item[2].trim() : "",
+        noteBack: item[3] ? item[3].trim() : ""
+    }));
+
+    let currentIndex = 0;
+
+    const cardEl = document.getElementById('card');
+    const frontTextEl = document.getElementById('card-front-text');
+    const backTextEl = document.getElementById('card-back-text');
+    const frontNoteEl = document.getElementById('card-front-note');
+    const backNoteEl = document.getElementById('card-back-note');
+    const progressTextEl = document.getElementById('progress-text');
+    const progressBarEl = document.getElementById('progress-bar');
+
+    // Dynamische Anpassung der Schriftgröße zum Schutz vor Text-Overflows
+    function adjustFontSize(element, text) {
+        const length = text.length;
+        if (length > 50) {
+            element.style.fontSize = "1.1rem";
+        } else if (length > 30) {
+            element.style.fontSize = "1.3rem";
+        } else {
+            element.style.fontSize = "1.7rem";
+        }
+    }
+
+    // Rendert die Karte basierend auf dem aktuellen Zustand
+    function updateCard() {
+        // Zuerst visuell zurückdrehen ohne flackernden Textwechsel
+        cardEl.classList.remove('flipped');
+        
+        setTimeout(() => {
+            const currentCard = cards[currentIndex];
+            
+            frontTextEl.textContent = currentCard.front;
+            backTextEl.textContent = currentCard.back;
+            
+            frontNoteEl.textContent = currentCard.noteFront;
+            backNoteEl.textContent = currentCard.noteBack;
+
+            adjustFontSize(frontTextEl, currentCard.front);
+            adjustFontSize(backTextEl, currentCard.back);
+
+            // Update Fortschrittsanzeige
+            const total = cards.length;
+            const displayIndex = total > 0 ? currentIndex + 1 : 0;
+            progressTextEl.textContent = `${displayIndex} / ${total}`;
+            
+            const progressPercent = total > 0 ? (displayIndex / total) * 100 : 0;
+            progressBarEl.style.width = `${progressPercent}%`;
+        }, cardEl.classList.contains('flipped') ? 150 : 0); 
+        // Falls die Karte umgedreht war, warten wir kurz die halbe Drehung ab, damit man das Ändern des Textes nicht sieht
+    }
+
+    // 1. Karte umdrehen
+    function flipCard() {
+        cardEl.classList.toggle('flipped');
+    }
+
+    // 2. Vorwärts navigieren
+    function nextCard() {
+        if (cards.length === 0) return;
+        currentIndex = (currentIndex + 1) % cards.length;
+        updateCard();
+    }
+
+    // 2. Rückwärts navigieren
+    function prevCard() {
+        if (cards.length === 0) return;
+        currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+        updateCard();
+    }
+
+    // 3. Karten mischen (Fisher-Yates-Verfahren)
+    function shuffleCards() {
+        if (cards.length <= 1) return;
+        for (let i = cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cards[i], cards[j]] = [cards[j], cards[i]];
+        }
+        currentIndex = 0;
+        updateCard();
+    }
+
+    // 4. Zurück zum Anfang springen
+    function goToStart() {
+        currentIndex = 0;
+        updateCard();
+    }
+
+    // Tastatursteuerung aktivieren
+    document.addEventListener('keydown', (event) => {
+        // Event-Handling angepasst, um ungewolltes Page-Scrolling bei Leertaste zu blockieren
+        switch (event.key) {
+            case ' ':
+            case 'Enter':
+                event.preventDefault();
+                flipCard();
+                break;
+            case 'ArrowLeft':
+                prevCard();
+                break;
+            case 'ArrowRight':
+                nextCard();
+                break;
+            case 'Home':
+                goToStart();
+                break;
+        }
+    });
+
+    // App initialisieren
+    window.onload = () => {
+        updateCard();
+    };
+</script>
+
+</body>
+</html>
