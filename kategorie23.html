@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Situationen sortieren</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 28px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 25%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        /* Die aktuelle Aufgabenkarte */
+        .card-container {
+            perspective: 1000px;
+            margin-bottom: 28px;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .situation-card {
+            background-color: #f0f7ff;
+            border: 2px dashed var(--primary-color);
+            border-radius: 12px;
+            padding: 24px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.05);
+            animation: popIn 0.3s ease;
+        }
+
+        /* Die beiden Zielkategorien */
+        .columns-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .category-column {
+            background-color: #f8fafc;
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+        }
+
+        .category-column h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #334155;
+        }
+
+        .category-column .sub-title {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        @media (hover: hover) {
+            .category-column:not(.disabled):hover {
+                border-color: var(--primary-color);
+                background-color: #f1f5f9;
+                transform: translateY(-2px);
+            }
+        }
+
+        /* Feedback-Zustände für die Spalten */
+        .category-column.correct-flash {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+            color: #065f46;
+        }
+
+        .category-column.wrong-flash {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+            color: #991b1b;
+            animation: shake 0.4s ease;
+        }
+
+        .category-column.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Feedback-Textbox */
+        .feedback-box {
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            margin-bottom: 24px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .feedback-box.success {
+            display: block;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+            color: #166534;
+        }
+
+        .feedback-box.error {
+            display: block;
+            background-color: #fff5f5;
+            border-left: 4px solid var(--error-color);
+            color: #991b1b;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            max-width: 180px;
+            text-align: center;
+        }
+
+        .btn-restart {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-restart:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+            display: none;
+        }
+
+        .btn-next:hover {
+            background-color: #2563eb;
+        }
+
+        .results-screen {
+            text-align: center;
+            display: none;
+            padding: 20px 0;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 520px) {
+            .container { padding: 20px 14px; }
+            h2 { font-size: 1.25rem; }
+            .situation-card { font-size: 1.05rem; padding: 16px; }
+            .columns-container { grid-template-columns: 1fr; gap: 12px; }
+            .category-column { min-height: auto; padding: 16px; }
+            .controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="game-zone">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <h2>Situationen einschätzen</h2>
+        <div class="instructions">
+            Lies die Alltagssituation und klicke unten auf die Spalte, in die sie am besten passt.
+        </div>
+        
+        <div class="card-container">
+            <div class="situation-card" id="situation-text"></div>
+        </div>
+
+        <div class="columns-container">
+            <div class="category-column" id="col-present" onclick="handleChoice('present')">
+                <h3>Geduld vorhanden</h3>
+                <span class="sub-title">(всё спокойно)</span>
+            </div>
+            <div class="category-column" id="col-ended" onclick="handleChoice('ended')">
+                <h3>Geduld am Ende</h3>
+                <span class="sub-title">(терпение лопнуло)</span>
+            </div>
+        </div>
+
+        <div class="feedback-box" id="feedback"></div>
+    </div>
+
+    <div class="results-screen" id="results-zone">
+        <h2 style="color: var(--success-color); margin-bottom: 12px;">Hervorragend gelöst! 🎉</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 24px;" id="score-text"></p>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-restart" onclick="restartQuiz()">Neustart</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">Weiter</button>
+    </div>
+</div>
+
+<script>
+    const situations = [
+        {
+            text: "„Ein Freund lügt mich zum fünften Mal an.“",
+            correctCategory: "ended",
+            explanation: "Richtig! Hier reisst der Geduldsfaden definitiv (терпение лопнуло)."
+        },
+        {
+            text: "„Ich warte ruhig auf den Bus.“",
+            correctCategory: "present",
+            explanation: "Ganz genau. Kein Grund zur Aufregung, die Geduld ist voll da."
+        },
+        {
+            text: "„Mein kleiner Bruder wirft absichtlich mein Smartphone auf den Boden, nachdem ich es ihm dreimal verboten habe.“",
+            correctCategory: "ended",
+            explanation: "Absolut! Nach mehrmaligen Warnungen ist die Toleranzgrenze überschritten."
+        },
+        {
+            text: "„Die Schlange an der Kasse ist lang, aber ich höre entspannt Musik.“",
+            correctCategory: "present",
+            explanation: "Richtig. Wer entspannt bleibt, hat seine Emotionen im Griff – Geduld vorhanden."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let isAnswered = false;
+
+    function loadSituation() {
+        isAnswered = false;
+        const s = situations[currentIdx];
+        document.getElementById('situation-text').textContent = s.text;
+        document.getElementById('progress').style.width = ((currentIdx + 1) / situations.length * 100) + '%';
+        
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+
+        // Spalten-Stile zurücksetzen
+        const colPresent = document.getElementById('col-present');
+        const colEnded = document.getElementById('col-ended');
+        colPresent.className = 'category-column';
+        colEnded.className = 'category-column';
+    }
+
+    function handleChoice(chosenCategory) {
+        if (isAnswered) return; // Klicks nach der Antwort sperren
+        
+        isAnswered = true;
+        const s = situations[currentIdx];
+        const feedback = document.getElementById('feedback');
+        
+        const colPresent = document.getElementById('col-present');
+        const colEnded = document.getElementById('col-ended');
+        
+        colPresent.classList.add('disabled');
+        colEnded.classList.add('disabled');
+
+        const isCorrect = (chosenCategory === s.correctCategory);
+        const targetColumn = chosenCategory === 'present' ? colPresent : colEnded;
+        const correctColumn = s.correctCategory === 'present' ? colPresent : colEnded;
+
+        if (isCorrect) {
+            score++;
+            targetColumn.classList.add('correct-flash');
+            feedback.className = 'feedback-box success';
+            feedback.innerHTML = `<strong>Richtig!</strong><br>${s.explanation}`;
+        } else {
+            targetColumn.classList.add('wrong-flash');
+            correctColumn.classList.add('correct-flash');
+            feedback.className = 'feedback-box error';
+            feedback.innerHTML = `<strong>Nicht ganz...</strong><br>${s.explanation}`;
+        }
+
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < situations.length) {
+            loadSituation();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('game-zone').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        
+        const resultsZone = document.getElementById('results-zone');
+        resultsZone.style.display = 'block';
+        document.getElementById('score-text').innerHTML = `Du hast <strong>${score}</strong> von <strong>${situations.length}</strong> Situationen völlig richtig eingeordnet.`;
+    }
+
+    function restartQuiz() {
+        currentIdx = 0;
+        score = 0;
+        document.getElementById('game-zone').style.display = 'block';
+        document.getElementById('results-zone').style.display = 'none';
+        loadSituation();
+    }
+
+    window.onload = loadSituation;
+</script>
+
+</body>
+</html>
