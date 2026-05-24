@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Interaktiver Dialog</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --chat-bg: #efeae2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            height: 90vh;
+            max-height: 700px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Chat-Header */
+        .chat-header {
+            background-color: #075e54;
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #128c7e;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .header-info h3 {
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .header-info span {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* Chat-Verlauf */
+        .chat-window {
+            flex: 1;
+            background-color: var(--chat-bg);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 1rem;
+            line-height: 1.4;
+            animation: popIn 0.3s ease;
+            position: relative;
+        }
+
+        .msg.partner {
+            background-color: #fff;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .msg.user {
+            background-color: #d9fdd3;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Info/Systemboxen */
+        .msg.system-info {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            align-self: center;
+            max-width: 95%;
+            font-size: 0.9rem;
+            color: #664d03;
+            border-radius: 8px;
+        }
+
+        /* Interaktiver Auswahlbereich */
+        .choice-area {
+            background-color: #f0f2f5;
+            padding: 16px;
+            border-top: 1px solid #e3e6ea;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .choice-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .btn-choice {
+            background-color: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        @media (hover: hover) {
+            .btn-choice:hover {
+                background-color: #f8fafc;
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+            }
+        }
+
+        .btn-restart {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-restart:hover {
+            background-color: #2563eb;
+        }
+
+        /* Tipp-Animation */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 4px 0;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background-color: #94a3b8;
+            border-radius: 50%;
+            animation: bounce 1.3s infinite bounce;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 480px) {
+            .chat-container { height: 100vh; max-height: none; border-radius: 0; }
+            body { padding: 0; }
+            .msg { font-size: 0.95rem; padding: 10px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="avatar">A</div>
+        <div class="header-info">
+            <h3>Anton (Freund)</h3>
+            <span id="status">online</span>
+        </div>
+    </div>
+
+    <div class="chat-window" id="chat-window">
+        <!-- Chat-Verlauf wird dynamisch generiert -->
+    </div>
+
+    <div class="choice-area">
+        <div class="choice-title" id="choice-header">Deine Reaktion</div>
+        <div id="choices-container">
+            <!-- Auswahl-Buttons werden dynamisch generiert -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatWindow = document.getElementById('chat-window');
+    const choicesContainer = document.getElementById('choices-container');
+    const statusText = document.getElementById('status');
+
+    // Dialogstruktur (Verzweigter Baum)
+    const dialogTree = {
+        start: {
+            partnerText: "Ich habe dich schon wieder angelogen. Es tut mir leid...",
+            choices: [
+                {
+                    text: "Ничего страшного. (Alles halb so wild.)",
+                    nextStep: "path_forgiving",
+                    isCorrect: false,
+                    feedback: "Huch? Wenn er dich schon wieder belügt, lädst du ihn wörtlich dazu ein, es noch einmal zu tun. Setze lieber eine klare Grenze!"
+                },
+                {
+                    text: "Всё, моё терпение лопнуло, мы больше не друзья! (Es reicht, mein Geduldsfaden ist gerissen...)",
+                    nextStep: "path_boundary",
+                    isCorrect: true,
+                    feedback: "Hervorragend! Du nutzt die gelernte Redewendung genau im richtigen Kontext, um eine klare persönliche Grenze zu ziehen."
+                }
+            ]
+        },
+        path_forgiving: {
+            partnerText: "Echt? Puh, danke! Dann ist es ja kein Problem, dass ich am Wochenende ohne dich auf die Party gehe, obwohl wir verabredet waren.",
+            choices: [
+                {
+                    text: "Hey! Jetzt reicht es aber! Моё терпение лопнуло!",
+                    nextStep: "path_end_angry",
+                    isCorrect: true,
+                    feedback: "Spät, aber richtig! Jetzt hast du die Reißleine gezogen. Der Ausdruck passt ideal."
+                }
+            ]
+        },
+        path_boundary: {
+            partnerText: "Bitte vergib mir! Ich verspreche dir, ab jetzt immer ehrlich zu sein. Können wir noch einmal reden?",
+            choices: [
+                {
+                    text: "Nein. Я не могу быть спокойным. Пока! (Ich kann nicht ruhig bleiben. Tschüss!)",
+                    nextStep: "path_end_final",
+                    isCorrect: true,
+                    feedback: "Konsequent! Du bleibst dabei und machst deinen Standpunkt mit den passenden Worten deutlich."
+                }
+            ]
+        },
+        path_end_angry: {
+            partnerText: "Oh... okay, jetzt verstehe ich, dass du sauer bist. Lass uns morgen in Ruhe reden.",
+            isEnd: true
+        },
+        path_end_final: {
+            partnerText: "Schade... Es tut mir wirklich leid. Ich werde deine Entscheidung akzeptieren.",
+            isEnd: true
+        }
+    };
+
+    function addMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${sender}`;
+        msgDiv.innerHTML = text;
+        chatWindow.appendChild(msgDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        statusText.textContent = "schreibt...";
+        const indicator = document.createElement('div');
+        indicator.className = "msg partner";
+        indicator.id = "typing-bubble";
+        indicator.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+        chatWindow.appendChild(indicator);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        statusText.textContent = "online";
+        const indicator = document.getElementById('typing-bubble');
+        if (indicator) indicator.remove();
+    }
+
+    function loadNode(nodeKey) {
+        choicesContainer.innerHTML = "";
+        const node = dialogTree[nodeKey];
+
+        if (!node) return;
+
+        showTypingIndicator();
+
+        // Partner antwortet verzögert für realistisches Chat-Feeling
+        setTimeout(() => {
+            removeTypingIndicator();
+            addMessage(node.partnerText, 'partner');
+
+            if (node.isEnd) {
+                showEndScreen();
+            } else {
+                renderChoices(node.choices);
+            }
+        }, 1500);
+    }
+
+    function renderChoices(choices) {
+        choicesContainer.innerHTML = "";
+        document.getElementById('choice-header').style.display = "block";
+
+        choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = "btn-choice";
+            btn.textContent = choice.text;
+            btn.onclick = () => handleUserChoice(choice);
+            choicesContainer.appendChild(btn);
+        });
+    }
+
+    function handleUserChoice(choice) {
+        choicesContainer.innerHTML = "";
+        
+        // Eigene Nachricht in den Chat schieben
+        addMessage(choice.text, 'user');
+
+        // Didaktisches Feedback anzeigen
+        setTimeout(() => {
+            addMessage(`<strong>Lerneffekt:</strong> ${choice.feedback}`, 'system-info');
+            
+            // Nächsten Dialogschritt laden
+            setTimeout(() => {
+                loadNode(choice.nextStep);
+            }, 1000);
+        }, 600);
+    }
+
+    function showEndScreen() {
+        document.getElementById('choice-header').style.display = "none";
+        
+        const btn = document.createElement('button');
+        btn.className = "btn-choice btn-restart";
+        btn.textContent = "Dialog neustarten ↺";
+        btn.onclick = () => initChat();
+        choicesContainer.appendChild(btn);
+    }
+
+    function initChat() {
+        chatWindow.innerHTML = "";
+        loadNode('start');
+    }
+
+    // Chat beim Start initialisieren
+    window.onload = initChat;
+</script>
+
+</body>
+</html>
